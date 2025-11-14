@@ -7,7 +7,9 @@ import otpRoutes from "./routes/otp.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import { swaggerSpec, swaggerUi } from "./config/swagger.js";
 import cors from "cors";
+import deviceBookingRoutes from "./routes/deviceBooking.routes.js"; 
 import patientPrescriptionRoutes from "./routes/patientPrescription.routes.js";
+
 
 dotenv.config();
 
@@ -44,6 +46,7 @@ app.use("/api/devices", deviceRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/otp", otpRoutes);
 app.use("/api/patient/prescriptions", patientPrescriptionRoutes);
+app.use("/api/device-bookings", deviceBookingRoutes);
 
 // Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
