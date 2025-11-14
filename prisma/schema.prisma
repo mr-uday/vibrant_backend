@@ -7,12 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  DOCTOR
-  NURSE
-  PATIENT
-  ADMIN
+model Prescription {
+  id          Int       @id @default(autoincrement())
+  patientId   Int
+  medicine    String
+  startDate   DateTime
+  endDate     DateTime
+  dosage      String
+  times       Json
+  foodTiming  String
+  notes       String?
+
+  patient     User      @relation(fields: [patientId], references: [id])
+  createdAt   DateTime  @default(now())
 }
+
 
 model User {
   id                 Int                @id @default(autoincrement())
@@ -38,6 +47,8 @@ model User {
   ratings           Rating[]
   ledgerEntries     LedgerEntry[]
   devices           Device[]
+
+  prescriptions     Prescription[]
 }
 
 // ENUMS ------------------------------------------------------------------
