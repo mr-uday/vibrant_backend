@@ -10,10 +10,14 @@ const options = {
       description: "MerilCare — Nurse, Device & Booking APIs",
     },
     servers: [
-      {
+    {
+        url: "http://10.11.7.87:5000",
+        description: "LAN server",
+    },
+    {
         url: "http://localhost:5000",
-        description: "Local server",
-      },
+        description: "Local dev",
+    }
     ],
     components: {
       securitySchemes: {
