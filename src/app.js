@@ -3,16 +3,13 @@ import dotenv from "dotenv";
 import nurseRoutes from "./routes/nurse.routes.js";
 import deviceRoutes from "./routes/device.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
+import otpRoutes from "./routes/otp.routes.js";
 
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-app.use("/api/nurse", nurseRoutes);
-app.use("/api/devices", deviceRoutes);
-app.use("/api/bookings", bookingRoutes);
 
 // Middlewares
 app.use(cors());
@@ -22,6 +19,11 @@ app.use(logger);
 
 // Routes
 app.use("/api", router);
+
+app.use("/api/nurse", nurseRoutes);
+app.use("/api/devices", deviceRoutes);
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/otp", otpRoutes)
 
 // Default Route
 app.get("/", (req, res) => {
