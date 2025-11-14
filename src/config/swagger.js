@@ -17,6 +17,9 @@ const options = {
     {
         url: "http://localhost:5000",
         description: "Local dev",
+    },{
+        url: "https://vibrant-backend-4.onrender.com",
+        description: "live server",
     }
     ],
     components: {

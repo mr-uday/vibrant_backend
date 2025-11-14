@@ -66,4 +66,27 @@ export default {
 
     ok(res, entry);
   },
+
+create: async (req, res) => {
+  const { caregiverId, dateFrom, dateTo, notes, totalAmount } = req.body;
+
+  try {
+    const booking = await prisma.caregiverBooking.create({
+      data: {
+        caregiverId,
+        requesterId: req.user.id,
+        dateFrom: new Date(dateFrom),
+        dateTo: new Date(dateTo),
+        notes,
+        totalAmount: totalAmount || 0,   // <-- FIX: default value
+        status: "REQUESTED",
+      },
+    });
+
+    ok(res, booking);
+  } catch (err) {
+    error(res, err.message);
+  }
+}
+
 };

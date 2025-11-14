@@ -81,4 +81,43 @@ export default {
       error(res, "Failed to fetch prescriptions");
     }
   },
+
+
+    /**
+   * @swagger
+   * /api/patient/prescriptions/{patientId}:
+   *   get:
+   *     summary: Get prescriptions for a specific patient (used by nurses)
+   *     tags: [Prescriptions]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: patientId
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: ID of the patient
+   *     responses:
+   *       200:
+   *         description: List of prescriptions for selected patient
+   */
+// GET prescriptions for ANY patient by ID
+getByPatientId: async (req, res) => {
+  try {
+    const patientId = Number(req.params.patientId);
+
+    const prescriptions = await prisma.prescription.findMany({
+      where: { patientId },
+      orderBy: { id: "desc" },
+    });
+
+    ok(res, prescriptions);
+  } catch (err) {
+    console.error(err);
+    error(res, "Failed to fetch patient prescriptions");
+  }
+}
+
+
 };

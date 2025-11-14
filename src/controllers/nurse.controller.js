@@ -81,7 +81,7 @@ export default {
   // ---------------- BOOKING REQUESTS ----------------
   bookingRequests: async (req, res) => {
     const requests = await prisma.caregiverBooking.findMany({
-      where: { caregiverId: req.user.id, status: "REQUESTED" },
+      where: { caregiverId: req.user.id },
       include: { requester: true },
       orderBy: { dateFrom: "asc" },
     });
@@ -189,5 +189,62 @@ export default {
     });
 
     ok(res, payout);
+  },
+
+
+  createBookingRequest: async (req, res) => {
+  const { caregiverId, dateFrom, dateTo, slotId, notes } = req.body;
+
+  try {
+    const booking = await prisma.caregiverBooking.create({
+      data: {
+        caregiverId,
+        requesterId: req.user.id,
+        dateFrom: new Date(dateFrom),
+        dateTo: new Date(dateTo),
+        slotId,
+        notes,
+        status: "REQUESTED",
+      },
+    });
+
+    ok(res, booking);
+  } catch (err) {
+    error(res, err.message);
+  }
+},
+listNurses: async (req, res) => {
+    try {
+      const nurses = await prisma.user.findMany({
+        where: {
+          role: "NURSE",
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          city: true,
+          languages: true,
+
+          caregiverProfile: {
+            select: {
+              bio: true,
+              experienceYears: true,
+              hourlyRate: true,
+              dailyRate: true,
+              skills: true,
+              travelRadiusKm: true,
+              backgroundCheckStatus: true,
+            },
+          },
+        },
+      });
+
+      ok(res, nurses);
+    } catch (err) {
+      console.error(err);
+      error(res, "Failed to fetch nurses");
+    }
   },
 };

@@ -1,264 +1,139 @@
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
-// Helpers
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-function addDays(d, days) {
-  const nd = new Date(d);
-  nd.setDate(nd.getDate() + days);
-  return nd;
-}
-
 async function main() {
-  console.log("Seeding...");
+  console.log("🔥 Seeding Nurses...");
 
-  const cities = ["Delhi", "Mumbai", "Bangalore", "Hyderabad", "Chennai", "Kolkata"];
-
-  // 1. Admin
-  const admin = await prisma.user.create({
-    data: {
-      name: "Admin Owner",
-      email: "admin@vibrant.test",
-      phone: "9000000001",
-      role: "ADMIN",
-      verified: true,
-    },
-  });
-
-  // 2. Doctors
-  const doctors = [];
-  for (let i = 1; i <= 10; i++) {
-    const u = await prisma.user.create({
-      data: {
-        name: `Doctor ${i}`,
-        email: `doctor${i}@vibrant.test`,
-        phone: `90000000${20 + i}`,
-        role: "DOCTOR",
-        city: pick(cities),
-        verified: true,
-      },
-    });
-
-    const d = await prisma.doctor.create({
-      data: {
-        id: u.id,
-        specialization: pick(["Cardiology", "Pulmonology", "ENT", "Orthopedics", "Paediatrics", "General Medicine"]),
-        experienceYears: randInt(2, 20),
-        qualifications: "MBBS, MD",
-        consultationFee: randInt(200, 2000),
-      },
-    });
-
-    doctors.push({ userId: u.id, doctorId: d.id });
-  }
-
-  // 3. Nurses (caregivers)
-  const caregivers = [];
-  for (let i = 1; i <= 10; i++) {
-    const u = await prisma.user.create({
-      data: {
-        name: `Nurse ${i}`,
-        email: `nurse${i}@vibrant.test`,
-        phone: `90000001${30 + i}`,
-        role: "NURSE",
-        city: pick(cities),
-        verified: true,
-      },
-    });
-
-    const c = await prisma.caregiver.create({
-      data: {
-        id: u.id,
-        bio: `Experienced nurse with ${randInt(1, 10)} years`,
-        experienceYears: randInt(1, 12),
-        hourlyRate: randInt(150, 600),
-        dailyRate: randInt(1200, 4500),
-        skills: { list: ["basic life support", "wound care", "vital monitoring"] },
-        travelRadiusKm: randInt(5, 30),
+  const nurses = [
+    {
+      id: 13,
+      name: "Ananya Rao",
+      email: "nurse13@example.com",
+      role: "NURSE",
+      city: "Mumbai",
+      languages: ["English", "Hindi", "Kannada"],
+      caregiver: {
+        bio: "Former Kokilaben ICU lead nurse with ACLS, airway management, and ventilator weaning expertise.",
+        experienceYears: 8,
+        hourlyRate: 850,
+        skills: ["Ventilator care", "Arterial line monitoring", "Proning"],
+        travelRadiusKm: 10,
         backgroundCheckStatus: true,
       },
-    });
-
-    caregivers.push({ userId: u.id, caregiverId: c.id });
-  }
-
-  // 4. Patients
-  const patients = [];
-  const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "O+", "O-"];
-  for (let i = 1; i <= 20; i++) {
-    const u = await prisma.user.create({
-      data: {
-        name: `Patient ${i}`,
-        email: `patient${i}@vibrant.test`,
-        phone: `90000002${40 + i}`,
-        role: "PATIENT",
-        city: pick(cities),
+    },
+    {
+      id: 22,
+      name: "Shreya Patel",
+      email: "nurse22@example.com",
+      role: "NURSE",
+      city: "Ahmedabad",
+      languages: ["English", "Gujarati", "Hindi"],
+      caregiver: {
+        bio: "NICU-trained pediatric nurse helping children transition from hospital to home.",
+        experienceYears: 6,
+        hourlyRate: 780,
+        skills: ["IV cannulation", "Feeding tube care", "Vaccination support"],
+        backgroundCheckStatus: true,
       },
-    });
-
-    const p = await prisma.patient.create({
-      data: {
-        id: u.id,
-        age: randInt(1, 85),
-        gender: pick(["Male", "Female", "Other"]),
-        bloodGroup: pick(bloodGroups),
-        allergies: randInt(0, 1) ? "None" : "Penicillin",
-        medicalHistory: { conditions: randInt(0, 1) ? ["hypertension"] : [] },
+    },
+    {
+      id: 14,
+      name: "Devika Menon",
+      email: "nurse14@example.com",
+      role: "NURSE",
+      city: "Bengaluru",
+      languages: ["English", "Malayalam", "Hindi"],
+      caregiver: {
+        bio: "Oncology infusion specialist ensuring chemotherapy adherence, PICC management, and symptom tracking.",
+        experienceYears: 10,
+        hourlyRate: 980,
+        skills: ["Chemo infusion", "Port flushing", "Pain management"],
+        backgroundCheckStatus: true,
       },
-    });
-
-    patients.push({ userId: u.id, patientId: p.id });
-  }
-
-  // 5. Devices (50)
-  const baseDeviceNames = [
-    "Multi-parameter patient monitor",
-    "Vital signs monitor",
-    "Tabletop pulse oximeter",
-    "Portable ECG machine",
-    "12-channel ECG machine",
-    "Holter monitor",
-    "Ambulatory BP monitor",
-    "Spirometer",
-    "Audiometer",
-    "Auto-refractometer",
-    "Portable ultrasound",
-    "Standard ultrasound",
-    "Digital X-ray machine",
-    "C-arm mobile image intensifier",
-    "Electrosurgical unit",
-    "Defibrillator monitor",
-    "Anesthesia workstation",
-    "Infusion pump",
-    "Syringe pump",
-    "ICU ventilator",
-    "BiPAP / CPAP machine",
-    "Crash cart",
-    "Radiant warmer",
-    "Infant incubator",
-    "Ultrasound therapy unit",
-    "TENS / NMES unit",
-    "ENT diagnostic set",
-    "Flexible nasopharyngoscope",
-    "Slit lamp",
-    "Applanation tonometer",
-    "Dental chair",
-    "Intraoral dental X-ray",
-    "Hospital bed",
-    "Wheelchair",
+    },
+    {
+      id: 15,
+      name: "Ritika Sharma",
+      email: "nurse15@example.com",
+      role: "NURSE",
+      city: "Delhi",
+      languages: ["Hindi", "English", "Punjabi"],
+      caregiver: {
+        bio: "Holistic elder-care nurse focusing on fall prevention, dementia-friendly routines, and vitals monitoring.",
+        experienceYears: 12,
+        hourlyRate: 720,
+        skills: ["Vitals tracking", "Mobility therapy", "Medication adherence"],
+        backgroundCheckStatus: true,
+      },
+    },
+    {
+      id: 16,
+      name: "Sahana Victor",
+      email: "nurse16@example.com",
+      role: "NURSE",
+      city: "Chennai",
+      languages: ["English", "Tamil"],
+      caregiver: {
+        bio: "Post-operative mobility specialist with robotics-assisted rehab.",
+        experienceYears: 7,
+        hourlyRate: 690,
+        skills: ["Neuro physio", "Technique coaching", "Vitals monitoring"],
+        backgroundCheckStatus: true,
+      },
+    },
+    {
+      id: 17,
+      name: "Lena Fernandes",
+      email: "nurse17@example.com",
+      role: "NURSE",
+      city: "Goa",
+      languages: ["English", "Konkani"],
+      caregiver: {
+        bio: "Home ICU setups, ventilator care, and AI-supported documentation.",
+        experienceYears: 9,
+        hourlyRate: 920,
+        skills: ["Tracheostomy care", "Ventilator titration", "Medication titration"],
+        backgroundCheckStatus: true,
+      },
+    },
   ];
 
-  const deviceOwners = [admin.id, ...doctors.map(d => d.userId), ...caregivers.map(c => c.userId)];
+  for (const nurse of nurses) {
+    await prisma.user.upsert({
+      where: { id: nurse.id },
+      update: {},
+      create: {
+        id: nurse.id,
+        name: nurse.name,
+        email: nurse.email,
+        role: nurse.role,
+        city: nurse.city,
+        languages: nurse.languages,
+        verified: true,
+        verificationStatus: "VERIFIED",
 
-  const devicesCreated = [];
-  for (let i = 0; i < 50; i++) {
-    const name = baseDeviceNames[i % baseDeviceNames.length];
-    const catArr = ["MONITORING","RESPIRATORY","CARDIAC","PROCEDURE","ICU","NEONATAL","PHYSIO","ENDOSCOPY","DENTAL","IMAGING","INFRASTRUCTURE"];
-    const condArr = ["GOOD","FAIR","POOR"];
-
-    const dev = await prisma.device.create({
-      data: {
-        name: name,
-        description: `${name} - available for rent.`,
-        category: pick(catArr),
-        condition: pick(condArr),
-        dailyPrice: randInt(100, 5000),
-        locationCity: pick(cities),
-        available: true,
-        images: { urls: [] },
-        ownerId: pick(deviceOwners),
-      },
-    });
-
-    devicesCreated.push({ id: dev.id });
-  }
-
-  // 6. Nurse Slots (30)
-  for (let i = 0; i < 30; i++) {
-    const nurse = pick(caregivers);
-    const start = addDays(new Date(), randInt(1, 20));
-    start.setHours(randInt(8, 18), 0, 0, 0);
-    const end = new Date(start);
-    end.setHours(start.getHours() + pick([2, 4, 8]));
-
-    await prisma.nurseSlot.create({
-      data: {
-        nurseId: nurse.caregiverId,
-        startAt: start,
-        endAt: end,
-        slotType: pick(["HOURLY", "DAILY"]),
-        maxHours: 8,
-        isRecurring: false,
-        locationZone: pick(["Zone A","Zone B","Zone C"]),
-      },
-    });
-  }
-
-  // 7. Caregiver Bookings (20)
-  for (let i = 0; i < 20; i++) {
-    const caregiver = pick(caregivers);
-    const requester = pick(patients);
-
-    const start = addDays(new Date(), randInt(1, 15));
-    const end = addDays(start, randInt(0, 2));
-
-    const booking = await prisma.caregiverBooking.create({
-      data: {
-        caregiverId: caregiver.caregiverId,
-        requesterId: requester.userId,
-        dateFrom: start,
-        dateTo: end,
-        hours: randInt(1, 12),
-        status: pick(["REQUESTED","RESERVED","ACTIVE","COMPLETED"]),
-        totalAmount: randInt(300, 5000),
-        notes: "Mock caregiver booking",
-      },
-    });
-
-    // Tasks
-    for (let t = 0; t < randInt(1, 3); t++) {
-      await prisma.bookingTask.create({
-        data: {
-          bookingId: booking.id,
-          title: `Task ${t + 1}`,
-          done: Math.random() > 0.5,
+        caregiverProfile: {
+          create: {
+            // ❗ DO NOT include id here
+            bio: nurse.caregiver.bio,
+            experienceYears: nurse.caregiver.experienceYears,
+            hourlyRate: nurse.caregiver.hourlyRate,
+            travelRadiusKm: nurse.caregiver.travelRadiusKm,
+            skills: nurse.caregiver.skills,
+            backgroundCheckStatus: nurse.caregiver.backgroundCheckStatus,
+          },
         },
-      });
-    }
-  }
-
-  // 8. Device bookings (40)
-  for (let i = 0; i < 40; i++) {
-    const device = pick(devicesCreated);
-    const user = pick(patients);
-
-    const start = addDays(new Date(), randInt(1, 20));
-    const end = addDays(start, randInt(1, 7));
-
-    await prisma.deviceBooking.create({
-      data: {
-        deviceId: device.id,
-        userId: user.userId,
-        dateFrom: start,
-        dateTo: end,
-        status: pick(["REQUESTED","ACTIVE","COMPLETED","CANCELLED"]),
-        totalPrice: randInt(150, 8000),
-        notes: "Mock device booking",
       },
     });
   }
 
-  console.log("Seed complete.");
+  console.log("✅ Nurses seeded successfully!");
 }
 
 main()
-  .catch((e) => {
-    console.error("Seed error:", e);
+  .catch((err) => {
+    console.error("❌ Seed error:", err);
     process.exit(1);
   })
   .finally(async () => {

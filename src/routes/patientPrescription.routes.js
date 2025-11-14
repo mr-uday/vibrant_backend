@@ -17,4 +17,8 @@ router.post("/", auth, controller.create);
 // Get all prescriptions for logged-in patient
 router.get("/", auth, controller.list);
 
+
+router.get("/:patientId", auth, controller.getByPatientId);
+
+
 export default router;

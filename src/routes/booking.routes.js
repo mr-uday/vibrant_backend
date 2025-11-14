@@ -13,6 +13,60 @@ const router = Router();
 
 /**
  * @swagger
+ * /api/bookings/request:
+ *   post:
+ *     summary: Create a new booking request for a caregiver (Patient → Nurse)
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - caregiverId
+ *               - dateFrom
+ *               - dateTo
+ *             properties:
+ *               caregiverId:
+ *                 type: integer
+ *                 example: 14
+ *               slotId:
+ *                 type: integer
+ *                 example: 102
+ *               dateFrom:
+ *                 type: string
+ *                 example: "2025-01-22T09:00:00Z"
+ *               dateTo:
+ *                 type: string
+ *                 example: "2025-01-22T11:00:00Z"
+ *               notes:
+ *                 type: string
+ *                 example: "Need assistance for wound dressing"
+ *     responses:
+ *       200:
+ *         description: Booking request created successfully
+ */
+router.post("/request", auth, controller.create);
+
+/**
+ * @swagger
+ * /api/bookings:
+ *   get:
+ *     summary: Get all caregiver bookings for the logged-in requester
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of bookings created by the requester
+ */
+router.get("/", auth, controller.list);
+
+/**
+ * @swagger
  * /api/bookings:
  *   get:
  *     summary: Get all caregiver bookings for the logged-in requester

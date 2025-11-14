@@ -308,6 +308,25 @@ router.get("/ledger", auth, controller.ledger);
 
 /**
  * @swagger
+ * tags:
+ *   - name: Nurse Directory
+ *     description: Public list of nurses
+ */
+
+/**
+ * @swagger
+ * /api/nurses/list:
+ *   get:
+ *     summary: Get all registered nurses
+ *     tags: [Nurse Directory]
+ *     responses:
+ *       200:
+ *         description: List of nurses
+ */
+router.get("/list", controller.listNurses);
+
+/**
+ * @swagger
  * /api/nurse/payout-request:
  *   post:
  *     summary: Create payout request
@@ -319,5 +338,6 @@ router.get("/ledger", auth, controller.ledger);
  *         description: Payout request created
  */
 router.post("/payout-request", auth, controller.payoutRequest);
+
 
 export default router;

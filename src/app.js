@@ -47,6 +47,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/otp", otpRoutes);
 app.use("/api/patient/prescriptions", patientPrescriptionRoutes);
 app.use("/api/device-bookings", deviceBookingRoutes);
+app.use("/api/nurses", nurseRoutes);
 
 // Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
