@@ -8,31 +8,32 @@ datasource db {
 }
 
 model User {
-  id             Int                @id @default(autoincrement())
-  name           String
-  email          String?            @unique
-  phone          String?            @unique
-  password       String?
-  role           UserRole
-  city           String?
-  address        String?
-  languages      String[]
-  verified       Boolean            @default(false)
+  id                 Int                @id @default(autoincrement())
+  name               String
+  email              String?            @unique
+  phone              String?            @unique
+  password           String?
+  role               UserRole
+  city               String?
+  address            String?
+  languages          Json?
+  verified           Boolean            @default(false)
   verificationStatus VerificationStatus @default(PENDING)
-  rejectionReason String?
-  createdAt      DateTime           @default(now())
+  rejectionReason    String?
+  createdAt          DateTime           @default(now())
 
   caregiverProfile Caregiver?
-  doctorProfile   Doctor?
-  patientProfile  Patient?
+  doctorProfile    Doctor?
+  patientProfile   Patient?
 
-  deviceBookings DeviceBooking[]
+  deviceBookings    DeviceBooking[]
   caregiverBookings CaregiverBooking[]
-  ratings        Rating[]
-  ledgerEntries  LedgerEntry[]
+  ratings           Rating[]
+  ledgerEntries     LedgerEntry[]
+  devices           Device[]
 }
 
-
+// ENUMS ------------------------------------------------------------------
 
 enum UserRole {
   DOCTOR
@@ -84,42 +85,41 @@ enum DeviceCondition {
   POOR
 }
 
-
+// CAREGIVER / NURSE ------------------------------------------------------
 
 model Caregiver {
-  id             Int                @id
-  user           User               @relation(fields: [id], references: [id])
-  bio            String?
-  experienceYears Int               @default(0)
-  hourlyRate     Float?
-  dailyRate      Float?
-  skills         String[]
-  travelRadiusKm Int                @default(10)
-  backgroundCheckStatus Boolean      @default(false)
+  id                    Int     @id
+  user                  User    @relation(fields: [id], references: [id])
+  bio                   String?
+  experienceYears       Int     @default(0)
+  hourlyRate            Float?
+  dailyRate             Float?
+  skills                Json?
+  travelRadiusKm        Int     @default(10)
+  backgroundCheckStatus Boolean @default(false)
 
-  documents       Json?
-  slots           NurseSlot[]
-  bookings        CaregiverBooking[]
+  documents     Json?
+  slots         NurseSlot[]
+  bookings      CaregiverBooking[]
+  ledgerEntries LedgerEntry[]
 }
-
 
 model NurseSlot {
-  id          Int       @id @default(autoincrement())
-  nurseId     Int
-  startAt     DateTime
-  endAt       DateTime
-  slotType    SlotType
-  maxHours    Int?
-  isRecurring Boolean   @default(false)
-  recurrence  Json?
+  id           Int      @id @default(autoincrement())
+  nurseId      Int
+  startAt      DateTime
+  endAt        DateTime
+  slotType     SlotType
+  maxHours     Int?
+  isRecurring  Boolean  @default(false)
+  recurrence   Json?
   locationZone String?
 
-  caregiver   Caregiver @relation(fields: [nurseId], references: [id])
+  caregiver Caregiver @relation(fields: [nurseId], references: [id])
 }
 
-
 model CaregiverBooking {
-  id          Int          @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   caregiverId Int
   requesterId Int
   dateFrom    DateTime
@@ -129,29 +129,28 @@ model CaregiverBooking {
   totalAmount Float
   notes       String?
 
-  caregiver   Caregiver      @relation(fields: [caregiverId], references: [id])
-  requester   User           @relation(fields: [requesterId], references: [id])
-  tasks       BookingTask[]
-  ledger      LedgerEntry?
+  caregiver Caregiver     @relation(fields: [caregiverId], references: [id])
+  requester User          @relation(fields: [requesterId], references: [id])
+  tasks     BookingTask[]
+  ledger    LedgerEntry[]
 }
-
-
 
 model BookingTask {
-  id          Int       @id @default(autoincrement())
-  bookingId   Int
-  title       String
-  done        Boolean   @default(false)
-  timestamp   DateTime? @default(now())
-  notes       String?
-  photoUrls   String[]
+  id        Int       @id @default(autoincrement())
+  bookingId Int
+  title     String
+  done      Boolean   @default(false)
+  timestamp DateTime? @default(now())
+  notes     String?
+  photoUrls Json?
 
-  booking     CaregiverBooking @relation(fields: [bookingId], references: [id])
+  booking CaregiverBooking @relation(fields: [bookingId], references: [id])
 }
 
+// DEVICES ----------------------------------------------------------------
 
 model Device {
-  id           Int              @id @default(autoincrement())
+  id           Int               @id @default(autoincrement())
   name         String
   category     EquipmentCategory
   condition    DeviceCondition   @default(GOOD)
@@ -162,14 +161,13 @@ model Device {
   description  String?
   ownerId      Int
 
-  owner        User              @relation(fields: [ownerId], references: [id])
-  bookings     DeviceBooking[]
+  owner    User            @relation(fields: [ownerId], references: [id])
+  bookings DeviceBooking[]
 }
-
 
 model Rating {
   id         Int      @id @default(autoincrement())
-  targetType String   // "device" or "caregiver"
+  targetType String
   targetId   Int
   raterId    Int
   score      Int
@@ -178,19 +176,69 @@ model Rating {
   rater      User     @relation(fields: [raterId], references: [id])
 }
 
-
+// LEDGER ------------------------------------------------------------------
 
 model LedgerEntry {
-  id         Int      @id @default(autoincrement())
-  nurseId    Int?
-  deviceId   Int?
-  bookingId  Int?
-  type       String   // earning, commission, payout
-  amount     Float
-  currency   String   @default("INR")
-  createdAt  DateTime @default(now())
-  meta       Json?
-  nurse      Caregiver? @relation(fields: [nurseId], references: [id])
-  deviceBooking DeviceBooking? @relation(fields: [bookingId], references: [id])
-  caregiverBooking CaregiverBooking? @relation(fields: [bookingId], references: [id])
+  id                 Int      @id @default(autoincrement())
+  nurseId            Int?
+  deviceBookingId    Int?
+  caregiverBookingId Int?
+  userId             Int?
+  type               String
+  amount             Float
+  currency           String   @default("INR")
+  createdAt          DateTime @default(now())
+  meta               Json?
+
+  nurse            Caregiver?        @relation(fields: [nurseId], references: [id])
+  deviceBooking    DeviceBooking?    @relation(fields: [deviceBookingId], references: [id], map: "ledger_deviceBooking_fkey")
+  caregiverBooking CaregiverBooking? @relation(fields: [caregiverBookingId], references: [id], map: "ledger_caregiverBooking_fkey")
+  user             User?             @relation(fields: [userId], references: [id])
+}
+
+// DOCTOR ------------------------------------------------------------------
+
+model Doctor {
+  id              Int     @id
+  user            User    @relation(fields: [id], references: [id])
+  specialization  String?
+  experienceYears Int?
+  qualifications  String?
+  bio             String?
+  consultationFee Float?
+
+  createdAt DateTime @default(now())
+}
+
+// PATIENT -----------------------------------------------------------------
+
+model Patient {
+  id             Int     @id
+  user           User    @relation(fields: [id], references: [id])
+  age            Int?
+  gender         String?
+  bloodGroup     String?
+  allergies      String?
+  medicalHistory Json?
+
+  createdAt DateTime @default(now())
+}
+
+// DEVICE BOOKING ----------------------------------------------------------
+
+model DeviceBooking {
+  id         Int           @id @default(autoincrement())
+  deviceId   Int
+  userId     Int
+  dateFrom   DateTime
+  dateTo     DateTime
+  status     BookingStatus @default(REQUESTED)
+  totalPrice Float
+  notes      String?
+
+  device Device        @relation(fields: [deviceId], references: [id])
+  user   User          @relation(fields: [userId], references: [id])
+  ledger LedgerEntry[]
+
+  createdAt DateTime @default(now())
 }
