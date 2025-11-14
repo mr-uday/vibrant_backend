@@ -9,14 +9,15 @@
     "dev": "nodemon src/app.js",
     "start": "node src/app.js"
   },
-    "prisma": {
-  "seed": "node prisma/seed.js"
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
