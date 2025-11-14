@@ -26,4 +26,5 @@ router.get("/earnings", auth, controller.earningsSummary);
 router.get("/ledger", auth, controller.ledger);
 router.post("/payout-request", auth, controller.payoutRequest);
 
+
 export default router;
