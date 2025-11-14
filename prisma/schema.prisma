@@ -8,8 +8,189 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  name     String
-  email    String  @unique
-  createdAt DateTime @default(now())
+  id             Int                @id @default(autoincrement())
+  name           String
+  email          String?            @unique
+  phone          String?            @unique
+  password       String?
+  role           UserRole
+  city           String?
+  address        String?
+  languages      String[]
+  verified       Boolean            @default(false)
+  verificationStatus VerificationStatus @default(PENDING)
+  rejectionReason String?
+  createdAt      DateTime           @default(now())
+
+  caregiverProfile Caregiver?
+  doctorProfile   Doctor?
+  patientProfile  Patient?
+
+  deviceBookings DeviceBooking[]
+  caregiverBookings CaregiverBooking[]
+  ratings        Rating[]
+  ledgerEntries  LedgerEntry[]
+}
+
+
+
+enum UserRole {
+  DOCTOR
+  HOSPITAL
+  NURSE
+  PATIENT
+  ADMIN
+}
+
+enum VerificationStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+enum BookingStatus {
+  REQUESTED
+  RESERVED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  EXPIRED
+}
+
+enum SlotType {
+  HOURLY
+  DAILY
+}
+
+enum EquipmentCategory {
+  MONITORING
+  RESPIRATORY
+  CARDIAC
+  PROCEDURE
+  ICU
+  NEONATAL
+  PHYSIO
+  ENDOSCOPY
+  DENTAL
+  IMAGING
+  INFRASTRUCTURE
+}
+
+enum DeviceCondition {
+  GOOD
+  FAIR
+  POOR
+}
+
+
+
+model Caregiver {
+  id             Int                @id
+  user           User               @relation(fields: [id], references: [id])
+  bio            String?
+  experienceYears Int               @default(0)
+  hourlyRate     Float?
+  dailyRate      Float?
+  skills         String[]
+  travelRadiusKm Int                @default(10)
+  backgroundCheckStatus Boolean      @default(false)
+
+  documents       Json?
+  slots           NurseSlot[]
+  bookings        CaregiverBooking[]
+}
+
+
+model NurseSlot {
+  id          Int       @id @default(autoincrement())
+  nurseId     Int
+  startAt     DateTime
+  endAt       DateTime
+  slotType    SlotType
+  maxHours    Int?
+  isRecurring Boolean   @default(false)
+  recurrence  Json?
+  locationZone String?
+
+  caregiver   Caregiver @relation(fields: [nurseId], references: [id])
+}
+
+
+model CaregiverBooking {
+  id          Int          @id @default(autoincrement())
+  caregiverId Int
+  requesterId Int
+  dateFrom    DateTime
+  dateTo      DateTime
+  hours       Int?
+  status      BookingStatus @default(REQUESTED)
+  totalAmount Float
+  notes       String?
+
+  caregiver   Caregiver      @relation(fields: [caregiverId], references: [id])
+  requester   User           @relation(fields: [requesterId], references: [id])
+  tasks       BookingTask[]
+  ledger      LedgerEntry?
+}
+
+
+
+model BookingTask {
+  id          Int       @id @default(autoincrement())
+  bookingId   Int
+  title       String
+  done        Boolean   @default(false)
+  timestamp   DateTime? @default(now())
+  notes       String?
+  photoUrls   String[]
+
+  booking     CaregiverBooking @relation(fields: [bookingId], references: [id])
+}
+
+
+model Device {
+  id           Int              @id @default(autoincrement())
+  name         String
+  category     EquipmentCategory
+  condition    DeviceCondition   @default(GOOD)
+  dailyPrice   Float
+  locationCity String
+  available    Boolean           @default(true)
+  images       Json?
+  description  String?
+  ownerId      Int
+
+  owner        User              @relation(fields: [ownerId], references: [id])
+  bookings     DeviceBooking[]
+}
+
+
+model Rating {
+  id         Int      @id @default(autoincrement())
+  targetType String   // "device" or "caregiver"
+  targetId   Int
+  raterId    Int
+  score      Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  rater      User     @relation(fields: [raterId], references: [id])
+}
+
+
+
+model LedgerEntry {
+  id         Int      @id @default(autoincrement())
+  nurseId    Int?
+  deviceId   Int?
+  bookingId  Int?
+  type       String   // earning, commission, payout
+  amount     Float
+  currency   String   @default("INR")
+  createdAt  DateTime @default(now())
+  meta       Json?
+  nurse      Caregiver? @relation(fields: [nurseId], references: [id])
+  deviceBooking DeviceBooking? @relation(fields: [bookingId], references: [id])
+  caregiverBooking CaregiverBooking? @relation(fields: [bookingId], references: [id])
 }

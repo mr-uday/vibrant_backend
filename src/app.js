@@ -1,13 +1,18 @@
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
-import { logger } from "./middlewares/logger.js";
-import router from "./routes/index.js";
+import nurseRoutes from "./routes/nurse.routes.js";
+import deviceRoutes from "./routes/device.routes.js";
+import bookingRoutes from "./routes/booking.routes.js";
+
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+app.use("/api/nurse", nurseRoutes);
+app.use("/api/devices", deviceRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 // Middlewares
 app.use(cors());
